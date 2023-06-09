@@ -1,1 +1,2 @@
-# Ecosystem-Simulation
+# EcosystemSimulation
+ 
