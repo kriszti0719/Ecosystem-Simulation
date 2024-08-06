@@ -84,12 +84,12 @@ public class ForestSpawner : Spawner
                 continue;
             if (hit.point.y < minHeight)
                 continue;
-            Debug.Log("Generated");
 
             // Instantiate the prefab and set its position, rotation, and scale
             GameObject instantiatedPrefab = (GameObject)PrefabUtility.InstantiatePrefab(prefab, transform);
             instantiatedPrefab.transform.position = hit.point;
             instantiatedPrefab.transform.Rotate(Vector3.up, Random.Range(rotationRange.x, rotationRange.y), Space.Self);
+            instantiatedPrefab.layer = LayerMask.NameToLayer("UI");
 
             instantiatedPrefab.transform.localScale = new Vector3(
                 Random.Range(minScale.x, maxScale.x),
