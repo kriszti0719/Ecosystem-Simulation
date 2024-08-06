@@ -35,5 +35,19 @@ public abstract class Spawner : MonoBehaviour
             DestroyImmediate(transform.GetChild(0).gameObject);
         }
     }
+
+    protected int Counter(string name)
+    {
+        Transform[] children = this.GetComponentsInChildren<Transform>(true);
+        int counter = 0;
+        foreach (Transform child in children)
+        {
+            if (child == this.transform)
+                continue;
+            if (child.name.Contains(name))
+                counter++;
+        }
+        return counter;
+    }
 }
 
