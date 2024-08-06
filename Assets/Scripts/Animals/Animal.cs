@@ -1,120 +1,176 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class Animal : MonoBehaviour
 {
-    public float moveSpeed = 3f;
-    public float rotSpeed = 100f;
+    //StaminaBar
+    public StaminaBar staminaBar;
 
-    public bool isPassive;
-    public bool isWandering = false;
-    public bool isRotatingLeft = false;
-    public bool isRotatingRight = false;
-    public bool isWalking = false;
+    public int maxStamina = 100;
+    public int currentStamina;
+    public bool isMoving = true;
+    public int breakCounter = 0;
 
-    // Define the minimum and maximum Y positions where the bunnies can wander
-    public float minY = 23f;
 
-    private void Update()
+    protected virtual void Start()
     {
-        if (!isWandering)
-        {
-            StartCoroutine(Wander());
-            Debug.Log("Started");
-        }
+        currentStamina = maxStamina;
+        staminaBar.SetMaxStamina(maxStamina);
+    }
+    protected void Update()
+    {
+    }
 
-        if (isRotatingRight)
+    public void SetStaminaBar(StaminaBar staminaBar)
+    {
+        this.staminaBar = staminaBar;
+    }
+
+    public void Move()
+    {
+        if(isMoving)
         {
-            transform.Rotate(transform.up * Time.deltaTime * rotSpeed);
-        }
-        if (isRotatingLeft)
-        {
-            transform.Rotate(transform.up * Time.deltaTime * -rotSpeed);
-        }
-        if (isWalking)
-        {
-            // Cast a ray downward to check for ground
-            RaycastHit groundHit;
-            if (Physics.Raycast(transform.position + new Vector3(0f, 100f, 0f), Vector3.down, out groundHit))
+            currentStamina--;
+
+            if (currentStamina == 70)
             {
-                if (groundHit.collider.CompareTag("Ground"))
+                // According to sum other circumstances it can decide
+                //  - to move on OR
+                //  - to stop for a little break
+
+                // Generate random number (0 or 1)
+                int randomValue = Random.Range(0, 2);
+                // Decide whether to stop for a break or continue moving
+                if (randomValue == 0)
                 {
-                    // Check if the bunny is below the valid Y range (water level)
-                    if (transform.position.y < minY)
-                    {
-                        // Change direction to avoid water
-                        ChangeDirection();
-                    }
+                    LittleBreak();
+                }
+
+            }
+            else if (currentStamina == 50)
+            {
+                // According to sum other circumstances it can decide
+                //  - to move on OR
+                //  - to stop for a normal break
+                //  - to stop for a little break
+
+                int randomValue = Random.Range(0, 3);
+                if (randomValue == 0)
+                {
+                    LittleBreak();
+                } 
+                else if (randomValue == 1)
+                {
+                    Break();
+                }
+            }
+            else if (currentStamina == 30)
+            {
+                // According to sum other circumstances it can decide
+                //  - to move on OR
+                //  - to sleep
+                //  - to stop for a normal break
+                //  - to stop for a little break
+
+                int randomValue = Random.Range(0, 4);
+                if (randomValue == 0)
+                {
+                    LittleBreak();
+                }
+                else if (randomValue == 1)
+                {
+                    Break();
+                }
+                else if (randomValue == 2)
+                {
+                    Sleep();
+                }
+            }
+            else if (currentStamina == 10)
+            {
+                // According to sum other circumstances it can decide
+                //  - to move on OR
+                //  - to sleep
+                //  - to stop for a normal break
+                //  - to stop for a little break
+
+                int randomValue = Random.Range(0, 4);
+                if (randomValue == 0)
+                {
+                    LittleBreak();
+                }
+                else if (randomValue == 1)
+                {
+                    Break();
+                }
+                else if (randomValue == 2)
+                {
+                    Sleep();
+                }
+            }
+            else if (currentStamina == 5)
+            {
+                // According to sum other circumstances it can decide
+                //  - to sleep
+                //  - to stop for a normal break
+                int randomValue = Random.Range(0, 2);
+                if (randomValue == 0)
+                {
+                    Sleep();
+                }
+                else if (randomValue == 1)
+                {
+                    Break();
                 }
             }
 
-            // Cast a ray forward to check for water
-            RaycastHit waterHit;
-            if (Physics.Raycast(transform.position, transform.forward, out waterHit, moveSpeed))
+        }
+        else
+        {
+            currentStamina++;
+            breakCounter--;
+            if(breakCounter == 0)
             {
-                if (waterHit.collider.CompareTag("Water"))
-                {
-                    // Change direction to avoid water
-                    ChangeDirection();
-                }
+                isMoving = true;
             }
-
-            // Move the bunny forward
-            transform.Translate(Vector3.forward * moveSpeed * Time.deltaTime);
         }
+
+        staminaBar.SetStamina(currentStamina);
+        
     }
 
-
-    IEnumerator Wander()
+    protected void LittleBreak()
     {
-        int rotTime = Random.Range(1, 3);
-        int rotateWait = Random.Range(1, 2);
-        int walkWait = Random.Range(1, 2);
-        int walkTime = Random.Range(1, 5);
-
-        isWandering = true;
-        yield return new WaitForSeconds(walkWait);
-
-        isWalking = true;
-        yield return new WaitForSeconds(walkTime);
-
-        // Check if the bunny is below the valid Y range
-        if (transform.position.y < minY )
+        isMoving = false;
+        if (currentStamina + 20 < maxStamina)
         {
-            ChangeDirection(); // Call the method to change direction
-        }
-
-        yield return new WaitForSeconds(rotateWait);
-
-        // Choose a random direction
-        int rotateDir = Random.Range(0, 2);
-        if (rotateDir == 0)
-        {
-            isRotatingLeft = true;
+            breakCounter = 20;
         }
         else
         {
-            isRotatingRight = true;
+            breakCounter = maxStamina - currentStamina;
         }
 
-        yield return new WaitForSeconds(rotTime);
-        isRotatingLeft = false;
-        isRotatingRight = false;
-
-        isWandering = false;
     }
 
-    void ChangeDirection()
+    protected void Break()
     {
-        int rotateDir = Random.Range(0, 2);
-        if (rotateDir == 0)
+        isMoving = false;
+        if (currentStamina + 50 < maxStamina)
         {
-            transform.Rotate(transform.up, -90f); // Rotate left by 90 degrees
+            breakCounter = 50;
         }
         else
         {
-            transform.Rotate(transform.up, 90f); // Rotate right by 90 degrees
+            breakCounter = maxStamina - currentStamina;
         }
+    }
+
+    protected void Sleep()
+    {
+        isMoving = false;
+        breakCounter = maxStamina - currentStamina;
     }
 }
