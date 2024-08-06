@@ -1,10 +1,11 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 
 public class AnimalSpawner : Spawner
 {
+    public GameObject canvasPrefab;
+    public Transform mainCamera;
+
     // Start is called before the first frame update
     public override void Generate()
     {
@@ -24,9 +25,8 @@ public class AnimalSpawner : Spawner
                 continue;
             if (hit.point.y < minHeight)
                 continue;
-            Debug.Log("Generated");
 
-            // Instantiate the prefab and set its position, rotation, and scale
+            // Instantiate the prefab and set its position, rotation, and scale:
             GameObject instantiatedPrefab = (GameObject)PrefabUtility.InstantiatePrefab(this.prefab, transform);
             instantiatedPrefab.transform.position = hit.point;
             instantiatedPrefab.transform.Rotate(Vector3.up, Random.Range(rotationRange.x, rotationRange.y), Space.Self);
@@ -36,13 +36,29 @@ public class AnimalSpawner : Spawner
                 Random.Range(minScale.z, maxScale.z)
             );
 
-            // Attach the Movement script
+            // Attach scripts:
             Movement instantiatedMovement = instantiatedPrefab.AddComponent<Movement>();
-
-            // Attach the Gravity script
             Gravity instantiatedGravity = instantiatedPrefab.AddComponent<Gravity>();
-
             Bunny instantiatedBunny = instantiatedPrefab.AddComponent<Bunny>();
+
+            GameObject instantiatedCanvas = (GameObject)PrefabUtility.InstantiatePrefab(this.canvasPrefab, transform);
+
+            if (instantiatedCanvas != null)
+            {
+                Debug.Log("B");
+
+
+                instantiatedCanvas.transform.SetParent(instantiatedPrefab.transform);
+                instantiatedCanvas.transform.position = new Vector3(instantiatedPrefab.transform.position.x, instantiatedPrefab.transform.position.y + 8, instantiatedPrefab.transform.position.z);
+                Debug.Log(instantiatedCanvas.transform.position);
+
+                instantiatedBunny.SetStaminaBar(instantiatedCanvas.GetComponentInChildren<StaminaBar>());
+                instantiatedCanvas.GetComponent<Billboard>().cam = mainCamera;
+
+                
+            }
+
+
             amount--;
         }
     }

@@ -4,9 +4,8 @@ using UnityEngine;
 
 public class Bunny : Animal
 {
-    public void Start()
+    protected override void Start()
     {
-        moveSpeed = 5;
-        rotSpeed = 15;
+        base.Start();
     }
 }
